@@ -4,11 +4,11 @@ Forge is an opinionated environment and configuration generator for modern web a
 
 ## Features
 
-- 🚀 **Interactive CLI**: Easy-to-use command-line interface for selecting your project stack.
-- ⚡ **Framework Support**: Built-in configuration generation for **Next.js** and **Express**.
-- 🔒 **Authentication Options**: Optional **JWT** setup and environment variable generation.
-- 🐳 **Docker-Ready**: Automatically generates `docker-compose.yml` for a local **PostgreSQL** database.
-- ⚙️ **Environment configs**: Creates `.env.example` tailored to your selected stack.
+- **Interactive CLI**: Easy-to-use command-line interface for selecting your project stack.
+- **Framework Support**: Built-in configuration generation for **Next.js** and **Express**.
+- **Authentication Options**: Optional **JWT** setup and environment variable generation.
+- **Docker-Ready**: Automatically generates `docker-compose.yml` for a local **PostgreSQL** database.
+- **Environment configs**: Creates `.env.example` tailored to your selected stack.
 
 ## Installation
 
