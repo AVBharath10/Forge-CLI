@@ -4,11 +4,26 @@ Forge is an opinionated environment and configuration generator for modern web a
 
 ## Features
 
-- **Interactive CLI**: Easy-to-use command-line interface for selecting your project stack.
-- **Framework Support**: Built-in configuration generation for **Next.js** and **Express**.
-- **Authentication Options**: Optional **JWT** setup and environment variable generation.
-- **Docker-Ready**: Automatically generates `docker-compose.yml` for a local **PostgreSQL** database.
-- **Environment configs**: Creates `.env.example` tailored to your selected stack.
+- **Interactive CLI**: Easy-to-use dialog-based interface for selecting your project stack.
+- **Frontend Frameworks**: 
+    - **Next.js**
+    - **React (Vite)**
+- **Backend Frameworks**: 
+    - **Express** (Node.js)
+    - **FastAPI** (Python)
+- **Database Support**: 
+    - **Postgres**
+    - **MySQL**
+    - **MongoDB**
+    - **SQLite**
+- **Authentication Scaffolding**: 
+    - Optional **JWT Auth** generation.
+    - Generates real authentication code: routes (`/login`, `/register`), middleware, and token handling logic for both Express and FastAPI.
+- **CI/CD Ready**: 
+    - Automatically generates a GitHub Actions workflow (`.github/workflows/ci.yml`) tailored to your chosen stack.
+- **One-Command Setup**: 
+    - Generates project structure (`frontend/`, `backend/`), `package.json` / `requirements.txt`, database connections, and `.env` files.
+- **Docker**: Automatically generates `docker-compose.yml` for your selected database.
 
 ## Installation
 
@@ -34,11 +49,16 @@ forge init
 
 ### What it generates
 
-Running `forge init` will create a `forge-project` directory containing:
+Running `forge init` will create a directory with your project name containing:
 
-- `docker-compose.yml`: PostgreSQL service configuration.
-- `.env.example`: Template for environment variables.
-- `README.md`: Project-specific instructions.
+- **Frontend**: A fully set up Next.js or Vite React app.
+- **Backend**: An Express or FastAPI server with:
+    - **DB Connection**: Pre-configured connection code to your chosen database.
+    - **Auth**: (If selected) Login and Register endpoints with JWT implementation.
+    - **Dependencies**: All necessary drivers and libraries installed.
+- **CI/CD**: A `.github/workflows/ci.yml` file for automated testing.
+- **Docker**: A `docker-compose.yml` file to spin up your database locally.
+- **.env**: A pre-filled `.env` file (and `.env.example`).
 
 ## Development
 
