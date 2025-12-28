@@ -74,7 +74,7 @@ pub fn generate_env(frontend: &FrontendFramework, backend: &BackendFramework, au
     env
 }
 
-pub fn generate_express_files(name: &str, db: &Database) -> Vec<(&'static str, String)> {
+pub fn generate_express_files(name: &str, db: &Database, auth: &Auth) -> Vec<(&'static str, String)> {
     let (db_dep, db_code) = match db {
         Database::Postgres => (
             "\"pg\": \"^8.11.3\"",
@@ -120,6 +120,12 @@ module.exports = db;"#
         ),
     };
 
+    // Add Auth dependencies
+    let auth_deps = match auth {
+        Auth::Jwt => ",\n    \"jsonwebtoken\": \"^9.0.2\",\n    \"bcryptjs\": \"^2.4.3\"",
+        Auth::None => "",
+    };
+
     let package_json = format!(
         r#"{{
   "name": "{}",
@@ -134,13 +140,13 @@ module.exports = db;"#
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    {}
+    "{}{}"
   }},
   "devDependencies": {{
     "nodemon": "^3.0.1"
   }}
 }}"#,
-        name, db_dep
+        name, db_dep, auth_deps
     );
 
     let db_import = match db {
@@ -148,10 +154,21 @@ module.exports = db;"#
         _ => "const db = require('./db');",
     };
 
+    let auth_imports = match auth {
+        Auth::Jwt => "const authRoutes = require('./routes/auth');",
+        Auth::None => "",
+    };
+
+    let auth_routes_mount = match auth {
+        Auth::Jwt => "app.use('/api/auth', authRoutes);",
+        Auth::None => "",
+    };
+
     let index_js = format!(
         r#"require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+{}
 {}
 
 const app = express();
@@ -159,6 +176,8 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+{}
 
 app.get('/', (req, res) => {{
   res.json({{ message: 'Hello from Forge Express with DB!' }});
@@ -168,17 +187,52 @@ app.listen(port, () => {{
   console.log(`Server running on port ${{port}}`);
 }});
 "#,
-        db_import
+        db_import, auth_imports, auth_routes_mount
     );
 
-    vec![
+    let mut files = vec![
         ("package.json", package_json),
         ("src/index.js", index_js),
         ("src/db.js", db_code.to_string()),
-    ]
+    ];
+
+    if let Auth::Jwt = auth {
+        let auth_route_code = r#"const express = require('express');
+const router = express.Router();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
+// Mock User DB for starter
+const users = [];
+
+router.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  users.push({ username, password: hashedPassword });
+  res.status(201).json({ message: 'User registered' });
+});
+
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find(u => u.username === username);
+  if (!user) return res.status(400).json({ message: 'User not found' });
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+
+  const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  res.json({ token });
+});
+
+module.exports = router;"#;
+        
+        files.push(("src/routes/auth.js", auth_route_code.to_string()));
+    }
+
+    files
 }
 
-pub fn generate_fastapi_files(_name: &str, db: &Database) -> Vec<(&'static str, String)> {
+pub fn generate_fastapi_files(_name: &str, db: &Database, auth: &Auth) -> Vec<(&'static str, String)> {
     let (db_req, db_file, db_import) = match db {
         Database::MongoDB => (
             "motor>=3.3.1",
@@ -216,17 +270,35 @@ Base = declarative_base()
         _ => db_req.to_string(),
     };
 
-    let requirements = format!("fastapi>=0.100.0\nuvicorn>=0.23.0\npython-dotenv>=1.0.0\n{}", final_req);
+    let auth_req = match auth {
+        Auth::Jwt => "\npython-jose[cryptography]>=3.3.0\npasslib[bcrypt]>=1.7.4\npython-multipart>=0.0.6",
+        Auth::None => "",
+    };
+
+    let requirements = format!("fastapi>=0.100.0\nuvicorn>=0.23.0\npython-dotenv>=1.0.0\n{}{}", final_req, auth_req);
+
+    let auth_imports = match auth {
+        Auth::Jwt => "from auth import router as auth_router",
+        Auth::None => "",
+    };
+
+    let auth_include = match auth {
+        Auth::Jwt => "app.include_router(auth_router, prefix=\"/auth\", tags=[\"auth\"])",
+        Auth::None => "",
+    };
 
     let main_py = format!(
         r#"from fastapi import FastAPI
 from dotenv import load_dotenv
 import os
 {}
+{}
 
 load_dotenv()
 
 app = FastAPI()
+
+{}
 
 @app.get("/")
 def read_root():
@@ -237,14 +309,88 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
 "#,
-        db_import
+        db_import, auth_imports, auth_include
     );
 
-    vec![
+    let mut files = vec![
         ("requirements.txt", requirements),
         ("main.py", main_py),
         ("database.py", db_file.to_string()),
-    ]
+    ];
+
+    if let Auth::Jwt = auth {
+        let auth_code = r#"from fastapi import APIRouter, HTTPException, Depends, status
+from pydantic import BaseModel
+from datetime import datetime, timedelta
+from typing import Optional
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+import os
+
+router = APIRouter()
+
+SECRET_KEY = os.getenv("JWT_SECRET", "secret")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Mock DB
+fake_users_db = {}
+
+class User(BaseModel):
+    username: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+@router.post("/register", status_code=201)
+def register(user: User):
+    if user.username in fake_users_db:
+        raise HTTPException(status_code=400, detail="User already registered")
+    fake_users_db[user.username] = {
+        "username": user.username,
+        "hashed_password": get_password_hash(user.password)
+    }
+    return {"msg": "User created"}
+
+@router.post("/token", response_model=Token)
+def login_for_access_token(user: User):
+    user_in_db = fake_users_db.get(user.username)
+    if not user_in_db or not verify_password(user.password, user_in_db['hashed_password']):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+"#;
+        files.push(("auth.py", auth_code.to_string()));
+    }
+
+    files
 }
 
 pub fn generate_docker_compose(db: &Database) -> Option<String> {
@@ -283,4 +429,72 @@ services:
 "#.to_string()),
         Database::SQLite => None,
     }
+}
+
+pub fn generate_ci_cd(name: &str, is_fullstack: bool) -> String {
+    let build_step = if is_fullstack {
+        r#"
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+          elif [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
+"#
+    } else {
+        r#"
+      - name: Install Dependencies
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+          elif [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Build
+        run: |
+          if [ -f "package.json" ] && grep -q "build" package.json; then
+            npm run build
+          fi
+"#
+    };
+
+    format!(
+        r#"name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+{}
+"#,
+        build_step
+    )
 }

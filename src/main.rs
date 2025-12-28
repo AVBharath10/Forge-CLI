@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand};
 use std::{env, fs, process::Command};
 use dialoguer::{Input, Select, theme::ColorfulTheme};
 use anyhow::{Result, Context};
-use crate::generator::{FrontendFramework, BackendFramework, Auth, Database, generate_env, generate_express_files, generate_fastapi_files, generate_docker_compose};
+use crate::generator::{FrontendFramework, BackendFramework, Auth, Database, generate_env, generate_express_files, generate_fastapi_files, generate_docker_compose, generate_ci_cd};
 
 #[derive(Parser)]
 #[command(name = "forge", about = "Opinionated env & config generator")]
@@ -174,7 +174,7 @@ fn scaffold_project(name: &str, frontend: &FrontendFramework, backend: &BackendF
 
         match backend {
             BackendFramework::Express => {
-                let files = generate_express_files(name, db);
+                let files = generate_express_files(name, db, auth);
                 for (path, content) in files {
                     let file_path = be_target_dir.join(path);
                     if let Some(parent) = file_path.parent() {
@@ -184,7 +184,7 @@ fn scaffold_project(name: &str, frontend: &FrontendFramework, backend: &BackendF
                 }
             }
             BackendFramework::FastAPI => {
-                let files = generate_fastapi_files(name, db);
+                let files = generate_fastapi_files(name, db, auth);
                 for (path, content) in files {
                     let file_path = be_target_dir.join(path);
                     if let Some(parent) = file_path.parent() {
@@ -208,6 +208,14 @@ fn scaffold_project(name: &str, frontend: &FrontendFramework, backend: &BackendF
     if let Some(docker_compose) = generate_docker_compose(db) {
         fs::write(root_dir.join("docker-compose.yml"), docker_compose)?;
     }
+
+    // CI/CD
+    let ci_cd_dir = root_dir.join(".github").join("workflows");
+    fs::create_dir_all(&ci_cd_dir)?;
+    fs::write(
+        ci_cd_dir.join("ci.yml"),
+        generate_ci_cd(name, is_fullstack),
+    )?;
 
     // README.md
     let readme_content = format!(
