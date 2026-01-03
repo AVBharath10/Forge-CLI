@@ -1,69 +1,117 @@
 # Forge
 
-Forge is an opinionated environment and configuration generator for modern web applications. It helps you bootstrap the infrastructure configuration for your projects quickly and consistently.
+Forge is an opinionated environment and configuration generator for modern web applications.
+
+It exists to answer a very specific question:
+
+> “Why am I spending 45 minutes setting up the same project structure again?”
+
+Forge helps you bootstrap infrastructure, tooling, and configuration quickly and consistently, so you can move on to writing actual application logic.
+
+---
+
+## What Forge Does
+
+Forge generates a complete, ready-to-run project setup based on your selected stack.  
+No placeholders, no TODOs, no “you figure this part out later”.
+
+You answer a few questions.
+Forge scaffolds the rest.
+
+---
 
 ## Features
 
-- **Interactive CLI**: Easy-to-use dialog-based interface for selecting your project stack.
-- **Frontend Frameworks**: 
-    - **Next.js**
-    - **React (Vite)**
-- **Backend Frameworks**: 
-    - **Express** (Node.js)
-    - **FastAPI** (Python)
-- **Database Support**: 
-    - **Postgres**
-    - **MySQL**
-    - **MongoDB**
-    - **SQLite**
-- **Authentication Scaffolding**: 
-    - Optional **JWT Auth** generation.
-    - Generates real authentication code: routes (`/login`, `/register`), middleware, and token handling logic for both Express and FastAPI.
-- **CI/CD Ready**: 
-    - Automatically generates a GitHub Actions workflow (`.github/workflows/ci.yml`) tailored to your chosen stack.
-- **One-Command Setup**: 
-    - Generates project structure (`frontend/`, `backend/`), `package.json` / `requirements.txt`, database connections, and `.env` files.
-- **Docker**: Automatically generates `docker-compose.yml` for your selected database.
+### Interactive CLI
+
+Forge uses an interactive, dialog-based CLI to guide you through stack selection without requiring you to memorize flags or templates.
+
+---
+
+### Frontend Frameworks
+
+- Next.js  
+- React (Vite)
+
+---
+
+### Backend Frameworks
+
+- Express (Node.js)
+- FastAPI (Python)
+
+---
+
+### Database Support
+
+- Postgres
+- MySQL
+- MongoDB
+- SQLite
+
+Forge generates:
+- Database connection code
+- Environment variables
+- Docker configuration (if applicable)
+
+---
+
+### Authentication Scaffolding
+
+Authentication is optional, but when enabled Forge generates real, working auth code.
+
+Includes:
+- JWT-based authentication
+- `/login` and `/register` routes
+- Token generation and verification
+- Middleware / dependencies for request protection
+
+Supported for both Express and FastAPI.
+
+---
+
+### CI/CD Ready
+
+The workflow is tailored to your selected stack and handles:
+- Dependency installation
+- Build steps
+- Basic validation
+
+---
+
+### One-Command Project Setup
+
+Forge generates:
+
+- `frontend/` and `backend/` directories
+- `package.json` or `requirements.txt`
+- Database configuration
+- `.env` and `.env.example`
+
+All in one command.
+
+---
+
+### Docker Support
+
+Forge automatically generates a `docker-compose.yml` file for your selected database, allowing local development without manual setup.
+
+---
 
 ## Installation
 
 ### Prerequisites
 
-- Rust and Cargo installed on your machine.
+- Rust
+- Cargo
 
-### Building from Source
+---
+
+### Build From Source
 
 ```bash
-git clone https://github.com/yourusername/forge.git
+git clone https://github.com/AVBharath10/forge.git
 cd forge
 cargo install --path .
-```
 
-## Usage
 
-Run the `init` command to start the interactive generator:
-
-```bash
-forge init
-```
-
-### What it generates
-
-Running `forge init` will create a directory with your project name containing:
-
-- **Frontend**: A fully set up Next.js or Vite React app.
-- **Backend**: An Express or FastAPI server with:
-    - **DB Connection**: Pre-configured connection code to your chosen database.
-    - **Auth**: (If selected) Login and Register endpoints with JWT implementation.
-    - **Dependencies**: All necessary drivers and libraries installed.
-- **CI/CD**: A `.github/workflows/ci.yml` file for automated testing.
-- **Docker**: A `docker-compose.yml` file to spin up your database locally.
-- **.env**: A pre-filled `.env` file (and `.env.example`).
-
-## Development
-
-To run the project locally during development:
-
-```bash
-cargo run -- init
-```
