@@ -1,40 +1,29 @@
-# Forge
+# Forge 
 
-Forge is an opinionated environment and configuration generator for modern web applications. It helps you bootstrap the infrastructure configuration for your projects quickly and consistently.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Rust](https://img.shields.io/badge/built_with-Rust-d33833.svg)](https://www.rust-lang.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-## Features
+**Forge** is an opinionated environment and configuration generator for modern web applications. It helps you bootstrap the infrastructure configuration for your projects quickly and consistently.
 
-- **Interactive CLI**: Easy-to-use dialog-based interface for selecting your project stack.
-- **Frontend Frameworks**: 
-    - **Next.js**
-    - **React (Vite)**
-- **Backend Frameworks**: 
-    - **Express** (Node.js)
-    - **FastAPI** (Python)
-- **Database Support**: 
-    - **Postgres**
-    - **MySQL**
-    - **MongoDB**
-    - **SQLite**
-- **Authentication Scaffolding**: 
-    - Optional **JWT Auth** generation.
-    - Generates real authentication code: routes (`/login`, `/register`), middleware, and token handling logic for both Express and FastAPI.
-- **CI/CD Ready**: 
-    - Automatically generates a GitHub Actions workflow (`.github/workflows/ci.yml`) tailored to your chosen stack.
-- **One-Command Setup**: 
-    - Generates project structure (`frontend/`, `backend/`), `package.json` / `requirements.txt`, database connections, and `.env` files.
-- **Docker**: Automatically generates `docker-compose.yml` for your selected database.
+##  Features
 
-## Installation
+- **Interactive CLI**: Easy-to-use dialog-based interface.
+- **Frontend**: Next.js (App Router), React (Vite).
+- **Backend**: Express (Node.js), FastAPI (Python).
+- **Database**: Postgres, MySQL, MongoDB, SQLite.
+- **Auth**: Built-in JWT scaffolding with Login/Register routes.
+- **DevOps**: Auto-generated `docker-compose.yml` and GitHub Actions CI.
 
-### Prerequisites
+##  Installation
 
-- Rust and Cargo installed on your machine.
+### From Components (Prerequisite)
+Ensure you have [Rust and Cargo](https://rustup.rs/) installed.
 
 ### Building from Source
 
 ```bash
-git clone https://github.com/yourusername/forge.git
+git clone https://github.com/AVBharath10/Forge-CLI.git
 cd forge
 cargo install --path .
 ```
@@ -47,23 +36,23 @@ Run the `init` command to start the interactive generator:
 forge init
 ```
 
-### What it generates
-
-Running `forge init` will create a directory with your project name containing:
-
-- **Frontend**: A fully set up Next.js or Vite React app.
-- **Backend**: An Express or FastAPI server with:
-    - **DB Connection**: Pre-configured connection code to your chosen database.
-    - **Auth**: (If selected) Login and Register endpoints with JWT implementation.
-    - **Dependencies**: All necessary drivers and libraries installed.
-- **CI/CD**: A `.github/workflows/ci.yml` file for automated testing.
-- **Docker**: A `docker-compose.yml` file to spin up your database locally.
+### Generated Stack
+Running `forge init` will create a directory containing:
+- **Frontend**: A fully configure Web App.
+- **Backend**: Server with pre-configured DB connection and Auth.
+- **Infrastructure**: CI/CD workflows and Docker Compose files.
 - **.env**: A pre-filled `.env` file (and `.env.example`).
 
-## Development
+##  Contributing
 
-To run the project locally during development:
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-```bash
-cargo run -- init
-```
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+##  License
+
+Distributed under the MIT License. See `LICENSE` for more information.
