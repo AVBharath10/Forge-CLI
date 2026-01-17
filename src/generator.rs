@@ -431,7 +431,7 @@ services:
     }
 }
 
-pub fn generate_ci_cd(name: &str, is_fullstack: bool) -> String {
+pub fn generate_ci_cd(_name: &str, is_fullstack: bool) -> String {
     let build_step = if is_fullstack {
         r#"
       - name: Install Frontend Dependencies

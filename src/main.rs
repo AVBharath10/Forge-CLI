@@ -1,4 +1,3 @@
-// src/main.rs
 
 mod generator;
 
@@ -103,7 +102,7 @@ fn run_init(name: Option<String>) -> Result<()> {
     if frontend != FrontendFramework::None && backend != BackendFramework::None {
         println!("This is a Full Stack project.");
         println!(" cd frontend && npm install && npm run dev");
-        println!("👉 cd backend && (setup backend)");
+        println!(" cd backend && (setup backend)");
     } else {
         match frontend {
             FrontendFramework::NextJs | FrontendFramework::React => println!(" npm install\n npm run dev"),
@@ -133,9 +132,7 @@ fn scaffold_project(name: &str, frontend: &FrontendFramework, backend: &BackendF
         fs::create_dir_all(&root_dir)?;
     }
 
-    // --- FRONTEND ---
     if *frontend != FrontendFramework::None {
-        // For CLI tools that CREATE a directory, we need to pass the target path.
         let target_arg = if is_fullstack {
             root_dir.join("frontend").to_str().unwrap().to_string()
         } else {
@@ -144,7 +141,6 @@ fn scaffold_project(name: &str, frontend: &FrontendFramework, backend: &BackendF
 
         match frontend {
             FrontendFramework::NextJs => {
-                // npx create-next-app@latest <target_arg>
                 let status = Command::new("cmd")
                     .args(["/C", "npx", "create-next-app@latest", &target_arg])
                     .status()
@@ -152,7 +148,6 @@ fn scaffold_project(name: &str, frontend: &FrontendFramework, backend: &BackendF
                 if !status.success() { eprintln!("Frontend generation failed or cancelled."); }
             }
             FrontendFramework::React => {
-                // npm create vite@latest <target_arg> -- --template react
                 let status = Command::new("cmd")
                     .args(["/C", "npm", "create", "vite@latest", &target_arg, "--", "--template", "react"])
                     .status()
@@ -163,11 +158,9 @@ fn scaffold_project(name: &str, frontend: &FrontendFramework, backend: &BackendF
         }
     }
 
-    // --- BACKEND ---
     if *backend != BackendFramework::None {
         let be_target_dir = if is_fullstack { root_dir.join("backend") } else { root_dir.clone() };
         
-        // Express/FastAPI allow us to just write files to be_target_dir
         if !be_target_dir.exists() {
             fs::create_dir_all(&be_target_dir)?;
         }
@@ -251,3 +244,15 @@ Check .env.example for environment variables.
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn verify_cli() {
+        use clap::CommandFactory;
+        Cli::command().debug_assert();
+    }
+}
+
