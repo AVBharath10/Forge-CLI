@@ -1,7 +1,13 @@
 [package]
 name = "forge"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+description = "An opinionated environment and configuration generator for modern web applications."
+repository = "https://github.com/AVBharath10/Forge-CLI"
+license = "MIT"
+keywords = ["cli", "generator", "scaffold", "web", "fullstack"]
+categories = ["command-line-utilities", "development-tools"]
+readme = "README.md"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
