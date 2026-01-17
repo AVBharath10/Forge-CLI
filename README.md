@@ -6,6 +6,8 @@
 
 **Forge** is an opinionated environment and configuration generator for modern web applications. It helps you bootstrap the infrastructure configuration for your projects quickly and consistently.
 
+https://github.com/user-attachments/assets/6c97439c-6ca0-438a-a4a4-5961248d0fd1
+
 ##  Features
 
 - **Interactive CLI**: Easy-to-use dialog-based interface.
