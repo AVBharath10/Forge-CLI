@@ -20,7 +20,7 @@
 ### From Components (Prerequisite)
 Ensure you have [Rust and Cargo](https://rustup.rs/) installed.
 
-### Building from Source
+### Build From Source
 
 ```bash
 git clone https://github.com/AVBharath10/Forge-CLI.git
