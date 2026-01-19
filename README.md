@@ -17,10 +17,22 @@
 
 ##  Installation
 
-### From Components (Prerequisite)
-Ensure you have [Rust and Cargo](https://rustup.rs/) installed.
+### Install (No Rust required)
 
-### Build From Source
+Download the latest binary for your OS from the [Releases](https://github.com/AVBharath10/Forge-CLI/releases) page.
+
+**Linux / macOS:**
+1. Download the binary.
+2. Make it executable: `chmod +x forge`
+3. Move it to your path: `sudo mv forge /usr/local/bin/`
+
+**Windows:**
+1. Download the `.exe` file.
+2. Add it to your PATH.
+
+### Install from source (Rust required)
+
+Ensure you have [Rust and Cargo](https://rustup.rs/) installed.
 
 ```bash
 git clone https://github.com/AVBharath10/Forge-CLI.git
